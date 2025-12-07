@@ -21,16 +21,16 @@ func main() {
 	if v := os.Getenv("MTH_LISTEN_ADDR"); v != "" {
 		addr = v
 	}
-	// storeType := os.Getenv("MTH_STORE")
+	storeType := os.Getenv("MTH_STORE")
 	builder := store.NewStoreBuilder()
-	// switch storeType {
-	// case "sqlite":
-	// 	builder.WithSQLite("data.db")
-	// default:
-	// 	builder.WithMemoryStore()
-	// }
+	switch storeType {
+	case "sqlite":
+		builder.WithSQLite("data.db")
+	default:
+		builder.WithMemoryStore()
+	}
 
-	st := builder.WithSQLite("./database").Build()
+	st := builder.Build()
 
 	srv := api.NewServer(addr, st)
 
