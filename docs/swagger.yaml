@@ -1,0 +1,142 @@
+definitions:
+  api.createJobRequest:
+    properties:
+      architectures:
+        items:
+          type: string
+        type: array
+      commit:
+        type: string
+      repo:
+        type: string
+      test_command:
+        type: string
+    type: object
+  api.createJobResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  api.jobTargetView:
+    properties:
+      arch:
+        type: string
+      ended_at:
+        type: string
+      exit_code:
+        type: integer
+      log:
+        type: string
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/core.TargetStatus'
+    type: object
+  api.jobView:
+    properties:
+      architectures:
+        items:
+          type: string
+        type: array
+      commit:
+        type: string
+      created_at:
+        type: string
+      ended_at:
+        type: string
+      id:
+        type: string
+      repo:
+        type: string
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/core.JobStatus'
+      targets:
+        items:
+          $ref: '#/definitions/api.jobTargetView'
+        type: array
+      test_command:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  core.JobStatus:
+    enum:
+    - pending
+    - running
+    - passed
+    - failed
+    - error
+    type: string
+    x-enum-varnames:
+    - JobStatusPending
+    - JobStatusRunning
+    - JobStatusPassed
+    - JobStatusFailed
+    - JobStatusError
+  core.TargetStatus:
+    enum:
+    - pending
+    - running
+    - passed
+    - failed
+    - error
+    type: string
+    x-enum-varnames:
+    - TargetStatusPending
+    - TargetStatusRunning
+    - TargetStatusPassed
+    - TargetStatusFailed
+    - TargetStatusError
+info:
+  contact: {}
+  title: My API
+  version: "1.0"
+paths:
+  /jobs:
+    post:
+      consumes:
+      - application/json
+      description: Triggers test execution across specified architectures
+      parameters:
+      - description: Job specification
+        in: body
+        name: job
+        required: true
+        schema:
+          $ref: '#/definitions/api.createJobRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.createJobResponse'
+      summary: Create a new multi-arch test job
+      tags:
+      - jobs
+  /jobs/{id}:
+    get:
+      description: Fetches job details with per-target results (truncated logs)
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.jobView'
+        "404":
+          description: Job not found
+          schema:
+            type: string
+      summary: Get job status
+      tags:
+      - jobs
+swagger: "2.0"

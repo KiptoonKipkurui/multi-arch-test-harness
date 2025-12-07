@@ -1,0 +1,8 @@
+# Dockerfile.runner
+FROM golang:1.23-alpine
+
+RUN apk add --no-cache git bash
+
+WORKDIR /root
+
+CMD ["bash"]

@@ -1,0 +1,210 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "My API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/jobs": {
+            "post": {
+                "description": "Triggers test execution across specified architectures",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "Create a new multi-arch test job",
+                "parameters": [
+                    {
+                        "description": "Job specification",
+                        "name": "job",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createJobRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.createJobResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs/{id}": {
+            "get": {
+                "description": "Fetches job details with per-target results (truncated logs)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "Get job status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Job ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.jobView"
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.createJobRequest": {
+            "type": "object",
+            "properties": {
+                "architectures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "commit": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
+                },
+                "test_command": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.createJobResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.jobTargetView": {
+            "type": "object",
+            "properties": {
+                "arch": {
+                    "type": "string"
+                },
+                "ended_at": {
+                    "type": "string"
+                },
+                "exit_code": {
+                    "type": "integer"
+                },
+                "log": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/core.TargetStatus"
+                }
+            }
+        },
+        "api.jobView": {
+            "type": "object",
+            "properties": {
+                "architectures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "commit": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "ended_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/core.JobStatus"
+                },
+                "targets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.jobTargetView"
+                    }
+                },
+                "test_command": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "core.JobStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "running",
+                "passed",
+                "failed",
+                "error"
+            ],
+            "x-enum-varnames": [
+                "JobStatusPending",
+                "JobStatusRunning",
+                "JobStatusPassed",
+                "JobStatusFailed",
+                "JobStatusError"
+            ]
+        },
+        "core.TargetStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "running",
+                "passed",
+                "failed",
+                "error"
+            ],
+            "x-enum-varnames": [
+                "TargetStatusPending",
+                "TargetStatusRunning",
+                "TargetStatusPassed",
+                "TargetStatusFailed",
+                "TargetStatusError"
+            ]
+        }
+    }
+}
