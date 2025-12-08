@@ -56,6 +56,7 @@ func NewServer(addr string, st store.Store) *Server {
 		store:  st,
 		runner: runner.NewRunner(st)}
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("/jobs", s.handleJobs)
 	mux.HandleFunc("/jobs/", s.routeJob)
 
@@ -69,6 +70,8 @@ func NewServer(addr string, st store.Store) *Server {
 	mux.Handle("/openapi.yaml", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./docs/swagger.yaml") // or ./docs/api/openapi.yaml
 	}))
+	mux.Handle("/", recoveryMiddleware(mux))
+
 	s.httpServer = &http.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -362,4 +365,16 @@ func toJobView(job *core.Job) jobView {
 		StartedAt:     job.StartedAt,
 		EndedAt:       job.EndedAt,
 	}
+}
+
+func recoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				logging.Logger.Error("handler_panic", "error", err, "path", r.URL.Path)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
