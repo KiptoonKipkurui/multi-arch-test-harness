@@ -55,13 +55,13 @@ jobs:
       - name: Build REAL runner images
         run: |
           # Build amd64 runner
-          docker buildx build -t multiarch-runner:amd64 \
+          docker buildx build -t multi-arch-runner:amd64 \
             --platform linux/amd64 \
             -f ./tests/Dockerfile.runner \
             --load .
           
           # Build arm64 runner (uses QEMU emulation)
-          docker buildx build -t multiarch-runner:arm64 \
+          docker buildx build -t multi-arch-runner:arm64 \
             -f ./tests/Dockerfile.runner \
             --platform linux/arm64 \
             --push .  # Push to temp registry or use --load
