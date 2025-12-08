@@ -3,9 +3,9 @@ package store
 import "github.com/kiptoonkipkurui/multi-arch-test-harness/internal/core"
 
 type Store interface {
-	SaveJob(job *core.Job)
+	SaveJob(job *core.Job) (*core.Job, error)
 	GetJob(id string) (*core.Job, error)
-	UpdateTarget(jobID, arch string, fn func(j *core.Job, t *core.JobTarget))
+	UpdateTarget(jobID, arch string, fn func(j *core.Job, t *core.JobTarget)) error
 	RecalculateJobStatus(jobID string) error
 	ListJobs() ([]*core.Job, error)
 }
