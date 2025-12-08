@@ -54,7 +54,12 @@ type JobTarget struct {
 
 // RecalculateJobStatus recomputes the overall job.Status from the target statuses
 func (job *Job) RecalculateJobStatus() {
-
+	if len(job.Targets) == 0 {
+		job.Status = JobStatusPending // or another default like JobStatusNoTargets
+		deriveJobTimes(job)
+		job.UpdatedAt = time.Now()
+		return
+	}
 	allPassed := true
 	anyRunning := false
 	anyFailedOrError := false
