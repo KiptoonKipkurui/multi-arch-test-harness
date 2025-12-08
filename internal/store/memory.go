@@ -22,10 +22,11 @@ func NewMemoryStore() Store {
 	}
 }
 
-func (s *MemoryStore) SaveJob(job *core.Job) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *MemoryStore) SaveJob(job *core.Job) (*core.Job, error) {
+
 	s.jobs[job.ID] = job
+
+	return job, nil
 }
 
 func (s *MemoryStore) GetJob(id string) (*core.Job, error) {
@@ -39,22 +40,24 @@ func (s *MemoryStore) GetJob(id string) (*core.Job, error) {
 }
 
 // updateTarget applies fn to the target for a job and arch and bumps UpdatedAt
-func (s *MemoryStore) UpdateTarget(jobID, arch string, fn func(j *core.Job, t *core.JobTarget)) {
+func (s *MemoryStore) UpdateTarget(jobID, arch string, fn func(j *core.Job, t *core.JobTarget)) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	job, ok := s.jobs[jobID]
 
 	if !ok {
-		return
+		return fmt.Errorf("job not found: %s", jobID)
 	}
 
 	for _, t := range job.Targets {
 		if t.Arch == arch {
 			fn(job, t)
 			job.UpdatedAt = time.Now()
-			return
+			break
 		}
 	}
+
+	return nil
 }
 
 // RecalculateJobStatus recomputes the overall job.Status from the target statuses
