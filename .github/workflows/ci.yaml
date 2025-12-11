@@ -64,7 +64,7 @@ jobs:
           docker buildx build -t multi-arch-runner:arm64 \
             -f ./tests/Dockerfile.runner \
             --platform linux/arm64 \
-            --push .  # Push to temp registry or use --load
+            --load .  # use --push to push to a registry
 
       - name: Start server + test
         run: |
