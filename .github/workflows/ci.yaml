@@ -65,6 +65,37 @@ jobs:
             -f ./tests/Dockerfile.runner \
             --platform linux/arm64 \
             --load .  # use --push to push to a registry
+      - name: Debug server startup
+        run: |
+          set -euo pipefail
+          
+          echo "=== Workspace check ==="
+          pwd
+          ls -la cmd/server/
+          cat cmd/server/main.go | head -20
+          
+          echo "=== Go env ==="
+          go version
+          go env GOPATH GOMOD
+          
+          echo "=== Dry run server ==="
+          timeout 5s go run ./cmd/server || echo "Server exited with code $?"
+          
+          echo "=== Background with logs ==="
+          go run ./cmd/server >server.log 2>&1 &
+          SERVER_PID=$!
+          
+          sleep 2
+          ps aux | grep "$SERVER_PID" || echo "PID $SERVER_PID died"
+          
+          echo "=== Server logs (first 50 lines) ==="
+          tail -50 server.log || echo "No logs captured"
+          
+          echo "=== Netstat check ==="
+          netstat -tlnp | grep :8080 || echo "Nothing listening on 8080"
+          
+          echo "=== Process list ==="
+          ps aux | grep go || echo "No Go processes"
 
       - name: Start server + test
         run: |
