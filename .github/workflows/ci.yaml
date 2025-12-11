@@ -68,27 +68,34 @@ jobs:
 
       - name: Start server + test
         run: |
-          # Start server
-          go run ./cmd/server &
-          SERVER_PID=$!
+          set -euo pipefail
+
+          echo "Starting server..."
           go run ./cmd/server >server.log 2>&1 &
           SERVER_PID=$!
 
-          sleep 2
+          echo "Server PID: $SERVER_PID"
+
+          # Wait a bit and check if process died
+          sleep 3
           if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-            echo "Server failed to start. Logs:"
-            cat server.log
+            echo "Server process exited early. Logs:"
+            cat server.log || echo "server.log missing"
             exit 1
           fi
 
-          # Then do the curl wait loop
+          echo "Waiting for /healthz..."
           for i in {1..30}; do
             if curl -sSf http://localhost:8080/healthz > /dev/null; then
               echo "Server ready after ${i}s"
-              break
+              exit 0
             fi
             sleep 1
-          done || (echo "Server never became ready"; cat server.log; exit 1)
+          done
+
+          echo "Server did not become ready in time. Final logs:"
+          cat server.log || echo "server.log missing"
+          exit 1
           
           # Submit real test job (uses your built images!)
           JOB_ID=$(curl -s -X POST http://localhost:8080/jobs \
