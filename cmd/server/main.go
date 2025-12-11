@@ -6,35 +6,42 @@ package main
 
 import (
 	"log"
-	"os"
-
-	"github.com/kiptoonkipkurui/multi-arch-test-harness/internal/api"
-	"github.com/kiptoonkipkurui/multi-arch-test-harness/internal/config"
-	"github.com/kiptoonkipkurui/multi-arch-test-harness/internal/logging"
-	"github.com/kiptoonkipkurui/multi-arch-test-harness/internal/store"
+	"net/http"
+	// 	"os"
+	// "github.com/kiptoonkipkurui/multi-arch-test-harness/internal/api"
+	// "github.com/kiptoonkipkurui/multi-arch-test-harness/internal/config"
+	// "github.com/kiptoonkipkurui/multi-arch-test-harness/internal/logging"
+	// "github.com/kiptoonkipkurui/multi-arch-test-harness/internal/store"
 )
 
 func main() {
-	logging.Init()
-	config.Load()
-	addr := ":8080"
-	if v := os.Getenv("MTH_LISTEN_ADDR"); v != "" {
-		addr = v
-	}
-	storeType := os.Getenv("MTH_STORE")
-	builder := store.NewStoreBuilder()
-	switch storeType {
-	case "sqlite":
-		builder.WithSQLite("data.db")
-	default:
-		builder.WithMemoryStore()
-	}
+	// logging.Init()
+	// config.Load()
+	// addr := ":8080"
+	// if v := os.Getenv("MTH_LISTEN_ADDR"); v != "" {
+	// 	addr = v
+	// }
+	// storeType := os.Getenv("MTH_STORE")
+	// builder := store.NewStoreBuilder()
+	// switch storeType {
+	// case "sqlite":
+	// 	builder.WithSQLite("data.db")
+	// default:
+	// 	builder.WithMemoryStore()
+	// }
 
-	st := builder.Build()
+	// st := builder.Build()
 
-	srv := api.NewServer(addr, st)
+	// srv := api.NewServer(addr, st)
 
-	if err := srv.Start(); err != nil {
-		log.Fatalf("server error: %v", err)
-	}
+	// if err := srv.Start(); err != nil {
+	// 	log.Fatalf("server error: %v", err)
+	// }
+
+	log.Println("Starting minimal server on :8080")
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	})
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
