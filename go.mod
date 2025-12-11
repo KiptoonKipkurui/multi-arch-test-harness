@@ -1,6 +1,6 @@
 module github.com/kiptoonkipkurui/multi-arch-test-harness
 
-go 1.25.4
+go 1.23
 
 require (
 	github.com/stretchr/testify v1.7.0
