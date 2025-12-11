@@ -71,9 +71,24 @@ jobs:
           # Start server
           go run ./cmd/server &
           SERVER_PID=$!
-          
-          # Wait for ready
-          timeout 30s bash -c 'while ! curl -sSf http://localhost:8080/healthz; do sleep 1; done'
+          go run ./cmd/server >server.log 2>&1 &
+          SERVER_PID=$!
+
+          sleep 2
+          if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+            echo "Server failed to start. Logs:"
+            cat server.log
+            exit 1
+          fi
+
+          # Then do the curl wait loop
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8080/healthz > /dev/null; then
+              echo "Server ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done || (echo "Server never became ready"; cat server.log; exit 1)
           
           # Submit real test job (uses your built images!)
           JOB_ID=$(curl -s -X POST http://localhost:8080/jobs \
